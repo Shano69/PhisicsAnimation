@@ -2,7 +2,7 @@
 // project includes
 // !!!!!!!!!IMPORTANT!!!!!!!!!!!!!!
 //DEFINE EITHER TaskTwo or TaskThree TO SEE DIFFERENT SCENES
-#define TaskThree
+#define Null
 #include "Particle.h"
 #include "Application.h"
 #include "Shader.h"
@@ -16,12 +16,12 @@
 
 // Other Libs
 #include "SOIL2/SOIL2.h"
-
+#ifdef TaskThree
 //WINDBLOWER FORCE FIELD SIZE
 glm::vec3 xmin = glm::vec3(-2.0f, 1.0f, -2.0f);
 glm::vec3 xmax = glm::vec3(2.0f, 5.0f, 2.0f);
-
-
+#endif
+/*
 //vectors
 glm::vec3 grav = glm::vec3(.0f, -9.8f, .0f);
 glm::vec3 force = glm::vec3(.0f, .0f, .0f);
@@ -30,7 +30,7 @@ glm::vec3 size = glm::vec3(12.0f, 12.0f, 12.0f);
 glm::vec3 drag = glm::vec3(.0f, .0f, .0f);
 //glm::vec3 pos = glm::vec3(.0f, .0f, .0f);
 glm::vec3 wind = glm::vec3(5.0f, 1.0f, 5.0f);
-
+*/
 float friction;
 // main function
 void Task2(Particle &first, Particle &second, Particle &third, float &accumulator, const float &dt);
@@ -48,7 +48,21 @@ int main()
 	// scale it up x5
 	plane.scale(glm::vec3(20.0f, 5.0f, 20.0f));
 	plane.setShader(Shader("resources/shaders/core.vert", "resources/shaders/core.frag"));
-
+	/*
+	FORCES
+	*/
+	
+	Force* g = new Gravity();
+	
+	/*
+	PARTICLES
+	*/
+	Particle p;
+	p.translate(glm::vec3(0.0f, 2.5f, 0.0f));
+	p.scale(glm::vec3(3.f, 3.f, 3.f));
+	p.setVel(glm::vec3(.0f, 0.0f, 0.0f));
+	p.getMesh().setShader(Shader("resources/shaders/core.vert", "resources/shaders/core_blue.frag"));
+	
 	// create particle
 	Particle particle;
 #ifdef TaskTwo
@@ -76,8 +90,9 @@ int main()
 	ex.translate(glm::vec3(6.0f, 2.5f, .0f));
 	ex.scale(glm::vec3(3.f, 3.f, 3.f));
 	ex.setVel(glm::vec3(-2.0f,2.0f, 0.0f));
-#endif
 	ex.getMesh().setShader(Shader("resources/shaders/core.vert", "resources/shaders/core_blue.frag"));
+#endif
+	
 	
 	//create semi implicit particle
 	Particle sim;
@@ -90,10 +105,11 @@ int main()
 	sim.translate(glm::vec3(0.0f, 2.5f, 0.0f));
 	sim.scale(glm::vec3(3.f, 3.f, 3.f));
 	sim.setVel(glm::vec3(0.0f, 1.0f, 3.0f));
-#endif
 	sim.getMesh().setShader(Shader("resources/shaders/core.vert", "resources/shaders/core_blue.frag"));
 
-	std::array<Particle, 3> particles { particle, ex, sim };
+	std::array<Particle, 3> particles{ particle, ex, sim };
+#endif
+	
 
 	// new time	
 	const float dt = 0.01f;
@@ -112,8 +128,22 @@ int main()
 		/*
 		**	INTERACTION
 		*/
+		p.addForce(g);
+		
+
 		// Manage interaction
 		app.doMovement(dt);
+
+		std::cout << p.getAcc().y << std::endl;
+		p.setAcc(p.applyForces(p.getPos(), p.getVel()));
+		while (accumulator >= dt)
+		{
+			//semi implicit
+			
+			p.getVel() = p.getVel() + dt*p.getAcc();
+			p.setPos(p.getPos() + dt*(p.getVel()));
+			accumulator -= dt;
+		}
 
 		#ifdef TaskThree
 			Task3(particles, accumulator, dt, xmin, xmax, wind);
@@ -135,7 +165,7 @@ int main()
 #endif
 #ifdef TaskTwo
 		Task2(particle, ex, sim, accumulator, dt);
-#endif
+#endif/*
 		for(auto &part:particles)
 		//COLLISION
 		for (int i = 0; i < 3; i++)
@@ -166,6 +196,7 @@ int main()
 		/*
 		**	RENDER
 		*/
+		
 		// clear buffer
 		app.clear();
 #ifdef TaskTwo
@@ -175,6 +206,7 @@ int main()
 #endif
 		// draw groud plane
 		app.draw(plane);
+		app.draw(p.getMesh());
 #ifdef TaskThree
 
 		for (auto  &part : particles)
@@ -191,7 +223,7 @@ int main()
 		return EXIT_SUCCESS;
 	}
 
-
+	/*
 void Task3(std::array<Particle, 3> &particles, float &accumulator, const float &dt, const glm::vec3 &xmin, const glm::vec3 &xmax, glm::vec3 &wind)
 {
 	for (auto &part : particles)
@@ -316,3 +348,4 @@ void Task2(Particle &first, Particle &second, Particle &third, float &accumulato
 
 	
 }
+*/

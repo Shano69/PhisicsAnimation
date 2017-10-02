@@ -1,8 +1,21 @@
 #pragma once
 #include "Mesh.h"
+#include "Force.h"
+#include<vector>
 
 class Body
 {
+	private:
+		Mesh m_mesh; // mesh used to represent the body
+					 // collection of forces
+		std::vector<Force*> m_forces;
+
+		float m_mass; // mass
+		float m_cor; // coefficient of restitution
+
+		glm::vec3 m_acc; // acceleration
+		glm::vec3 m_vel; // velocity
+		glm::vec3 m_pos; // position
 	public:
 		Body();
 		~Body();
@@ -10,7 +23,9 @@ class Body
 		** GET METHODS
 		*/
 		// mesh
-		Mesh & getMesh() { return m_mesh; }
+		Mesh &getMesh() { return m_mesh; }
+		// force
+		std::vector<Force*> getForces() const { return m_forces; }
 
 		 // transform matrices
 		 glm::mat4 getTranslate() const { return m_mesh.getTranslate(); }
@@ -32,7 +47,9 @@ class Body
 		 */
 		 // mesh
 		 void setMesh(Mesh m) { m_mesh = m; }
-
+		 // force
+		 void addForce(Force *f) { m_forces.push_back(f); }
+		 glm::vec3 applyForces(glm::vec3 x, glm::vec3 v);
 		 // dynamic variables
 		 void setAcc(const glm::vec3 & vect) { m_acc = vect; }
 		 void setVel(const glm::vec3 & vect) { m_vel = vect; }
@@ -52,13 +69,4 @@ class Body
 		 void translate(const glm::vec3 & vect);
 		 void rotate(float angle, const glm::vec3 & vect);
 		 void scale(const glm::vec3 & vect);
-	 private:
-		Mesh m_mesh; // mesh used to represent the body
-
-		float m_mass; // mass
-		float m_cor; // coefficient of restitution
-	
-		glm::vec3 m_acc; // acceleration
-		glm::vec3 m_vel; // velocity
-		glm::vec3 m_pos; // position
 };
