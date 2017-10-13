@@ -51,7 +51,6 @@ void Mesh::initTransform() {
 // create mesh from vertices
 void Mesh::initMesh(Vertex* vertices, unsigned int numVertices) {
 	m_numIndices = numVertices;
-
 	glGenVertexArrays(1, &m_vertexArrayObject);
 	glBindVertexArray(m_vertexArrayObject);
 	glGenBuffers(NUM_BUFFERS, m_vertexArrayBuffers);
