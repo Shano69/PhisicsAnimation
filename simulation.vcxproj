@@ -175,11 +175,8 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="OBJLoader.cpp" />
     <ClCompile Include="Particle.cpp" />
-<<<<<<< HEAD
     <ClCompile Include="Rigid.cpp" />
     <ClCompile Include="RigidBody.cpp" />
-=======
->>>>>>> 63780dcbad1d58160779084c5011a25528dd0f7c
     <ClCompile Include="Task1.cpp" />
     <ClCompile Include="Task2and3.cpp" />
   </ItemGroup>
