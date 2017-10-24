@@ -17,14 +17,24 @@
 ** VERTEX CLASS 
 */
 class Vertex {
-public:
-	Vertex(const glm::vec3& coord) {
-		this->coord = coord;
-	}
-protected:
-private:
-	glm::vec3 coord;
+	 public:
+		
+			 Vertex() {
+			 m_coord = glm::vec3();
+			
+		}
+		
+			 Vertex(const glm::vec3 & coord) {
+			 m_coord = coord;
+			
+		}
+		 glm::vec3 getCoord() const { return m_coord; }
+		
+			 private:
+				 glm::vec3 m_coord;
+				
 };
+
 
 enum MeshBufferPositions
 {
@@ -50,6 +60,18 @@ public:
 	Mesh(const std::string& fileName);
 	virtual ~Mesh();
 
+	//enumerator for mesh type
+	enum MeshType
+	{
+		TRIANGLE,
+		QUAD,
+		CUBE
+	};
+
+	// construct a mesh from a type
+
+	Mesh(MeshType type);
+
 
 	/*
 	** GET AND SET METHODS
@@ -64,6 +86,8 @@ public:
 	Shader getShader() const { return m_shader; }
 	GLuint getVertexArrayObject() const{ return m_vertexArrayObject; }
 	unsigned int getNumIndices() const{ return m_numIndices; }
+	//vertices
+	std::vector < Vertex > getVertices() { return m_vertices; }
 
 	// set position of mesh center to specified 3D position vector
 	void setPos(const glm::vec3 &position) {
@@ -124,6 +148,7 @@ private:
 	glm::mat4 m_rotate;
 	glm::mat4 m_scale;
 
+	std::vector < Vertex > m_vertices;
 	Shader m_shader;
 };
 
