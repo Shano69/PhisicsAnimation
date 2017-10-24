@@ -1,5 +1,8 @@
 #if 0
+<<<<<<< HEAD
 
+=======
+>>>>>>> 63780dcbad1d58160779084c5011a25528dd0f7c
 #include "Particle.h"
 #include "Application.h"
 #include "Shader.h"
@@ -104,11 +107,19 @@ int main()
 	Hooks pointing downard
 	*/
 	std::array<Hook, 4> hooks;
+<<<<<<< HEAD
 	float ks = 8.0f;
 	float kd = 0.0f;
 	for (auto &hook : hooks)
 	{
 		hook = Hook(ks, kd, 0.05f);
+=======
+	float ks = 10.0f;
+	float kd = 5.0f;
+	for (auto &hook : hooks)
+	{
+		hook = Hook(ks, kd, 0.5f);
+>>>>>>> 63780dcbad1d58160779084c5011a25528dd0f7c
 
 	}
 
@@ -167,10 +178,17 @@ int main()
 		app.doMovement(dt);
 
 
+<<<<<<< HEAD
 		//addCollision(particles[1]);
 		//addCollision(particles[2]);
 		//addCollision(particles[3]);
 		//addCollision(particles[4]);
+=======
+		addCollision(particles[1]);
+		addCollision(particles[2]);
+		addCollision(particles[3]);
+		addCollision(particles[4]);
+>>>>>>> 63780dcbad1d58160779084c5011a25528dd0f7c
 
 		setAcceleration(particles);
 
@@ -195,4 +213,9 @@ int main()
 
 	return EXIT_SUCCESS;
 }
+<<<<<<< HEAD
 #endif
+=======
+
+#endif
+>>>>>>> 63780dcbad1d58160779084c5011a25528dd0f7c

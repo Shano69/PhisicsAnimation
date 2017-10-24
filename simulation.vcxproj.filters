@@ -48,12 +48,15 @@
     <ClCompile Include="ClothTask2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="Rigid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RigidBody.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+=======
+>>>>>>> 63780dcbad1d58160779084c5011a25528dd0f7c
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\basic.frag">

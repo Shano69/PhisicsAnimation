@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #if 0 
+=======
+#if 0
+>>>>>>> 63780dcbad1d58160779084c5011a25528dd0f7c
 
 #include "Particle.h"
 #include "Application.h"
@@ -194,7 +198,11 @@ int main()
 	Drag drag = Drag();
 	Aero aero = Aero();
 	Wind wind = Wind();
+<<<<<<< HEAD
 	wind.setWind(glm::vec3(0.0f, 0.0f, .0f));
+=======
+	wind.setWind(glm::vec3(5.0f, 2.0f, .0f));
+>>>>>>> 63780dcbad1d58160779084c5011a25528dd0f7c
 	/*
 	Hooks pointing downard
 	*/
@@ -278,7 +286,10 @@ int main()
 		//New frame time
 		GLfloat newTime = (GLfloat)glfwGetTime();
 		GLfloat frameTime = newTime - currentTime;
+<<<<<<< HEAD
 		frameTime *= 2.0f;
+=======
+>>>>>>> 63780dcbad1d58160779084c5011a25528dd0f7c
 		currentTime = newTime;
 		accumulator += frameTime;
 
@@ -316,4 +327,8 @@ int main()
 
 	return EXIT_SUCCESS;
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 63780dcbad1d58160779084c5011a25528dd0f7c
 #endif
