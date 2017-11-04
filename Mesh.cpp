@@ -30,7 +30,7 @@ Mesh::Mesh()
 // Create a mesh from an object type 
 Mesh::Mesh(MeshType type)
 {
-		std::array<Vertex, 36> vertices;
+	Vertex vertices[36];
 	
 		 switch (type)
 		 {
@@ -94,15 +94,37 @@ Mesh::Mesh(MeshType type)
 							 }
 	
 		 // uniqueness check between the Vertices' glm::vec3 coordinates
-		 auto uniqueCheck = [](Vertex& lhs, Vertex& rhs) { return !(lhs.getCoord() == rhs.getCoord()); };
-		 // copy only the unique values from the vertices array to the class's vertices vector
-		 std::unique_copy(vertices.begin(), vertices.end(), std::back_inserter(m_vertices), uniqueCheck);
+		 std::set<Vertex> unique;
+		 for (auto ver : vertices)
+		 {
+			 unique.insert(ver);
+		 }
+		 m_vertices = std::vector<Vertex>(std::begin(unique), std::end(unique));
+
+		/* m_vertices = std::vector <Vertex>(std::begin(vertices), std::end(vertices));
+		 
+		for(int i= 0; i< m_vertices.size();i++)
+		{
+			for (int j = 0; j < m_vertices.size(); j++)
+			{
+				if (m_vertices[i].getCoord() == m_vertices[j].getCoord())
+				{
+					
+						if (m_vertices[i].getCoord() == m_vertices[j].getCoord())
+						{
+							for (int k = j; k<m_vertices.size() - 1; ++k)
+								m_vertices[k] = m_vertices[k + 1];
+
+							
+						}
+						else
+							++j;
+				}
+			}
+		}*/
 
 		 // create mesh
-		 initMesh((Vertex*)&vertices, vertices.size());
-		
-		
-		 // create mesh
+		 initMesh(vertices, sizeof(vertices) / sizeof(vertices[0]));
 	
 		 // create model matrix ( identity )
 		 initTransform();

@@ -5,7 +5,8 @@
 
 class Body
 {
-	private:
+protected:
+	
 		Mesh m_mesh; // mesh used to represent the body
 					 // collection of forces
 		std::vector<Force*> m_forces;
@@ -21,7 +22,7 @@ class Body
 		~Body();
 		/*
 		** GET METHODS
-		*/
+		*/	
 		// mesh
 		Mesh &getMesh() { return m_mesh; }
 		// force

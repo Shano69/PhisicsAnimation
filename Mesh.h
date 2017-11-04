@@ -2,12 +2,13 @@
 #include <GL/glew.h>
 
 // GLM
+#define GLM_FORCE_SWIZZLE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_operation.hpp>
 #include "glm/ext.hpp"
-
+#include <set>
 #include <string>
 #include <vector>
 #include "OBJloader.h"
@@ -29,7 +30,14 @@ class Vertex {
 			
 		}
 		 glm::vec3 getCoord() const { return m_coord; }
-		
+		 inline bool operator<(const Vertex& other) const
+		 {
+			 return m_coord.x != other.m_coord.x ? m_coord.x < other.m_coord.x
+				 : m_coord.y != other.m_coord.y ? m_coord.y < other.m_coord.y
+				 : m_coord.z < other.m_coord.z;
+		 }
+
+
 			 private:
 				 glm::vec3 m_coord;
 				
@@ -131,6 +139,8 @@ public:
 	void translate(const glm::vec3 &vect);
 	// rotate mesh by a vector
 	void rotate(const float &angle, const glm::vec3 &vect);
+	inline void setRotateMat4(glm::mat4 tmat4) { m_rotate = tmat4; }
+	void setRotate(glm::mat4 r) { m_rotate = r; }
 	// scale mesh by a vector
 	void scale(const glm::vec3 &vect);
 
