@@ -69,14 +69,8 @@ void handleCollisions(const std::vector<RigidBody*>& rigidBodies, Mesh plane)
 			if (canRespondDynamic)
 			{
 				IntersectData data = rb1->canCollideDynamic(rb2);
-				
-				//std::cout << "A dynamic collision was detected.\n";
-			/*	rb1->setVel(-1.0f * rb1->getVel());
-				rb2->setVel(-1.0f * rb2->getVel());
-				rb1->setAngVel(-1.0f * rb1->getAngVel());
-				rb2->setAngVel(-1.0f * rb2->getAngVel());*/
-				//std::cout<<"Collided!"<<std::endl;
 				respond(*rb1,*rb2,data);
+			
 			}
 		}
 	}
@@ -100,12 +94,14 @@ void respond(RigidBody& rb1, RigidBody& rb2, IntersectData data)
 		
 	}
 
+
 	if (glm::length(rb2.getVel()) + glm::length(rb2.getAngVel()) < 0.2f)
 	{
 		rb2.getVel() = glm::vec3(0.0f);
 		rb2.setAngVel(glm::vec3(0.0f));
 		rb2.getAcc() = glm::vec3(0.0f);
 		
+
 	}
 	
 	//local points of contact
@@ -114,12 +110,12 @@ void respond(RigidBody& rb1, RigidBody& rb2, IntersectData data)
 		int count = 0;
 		for (int i = 0; i < data.getContacts().size(); i++)
 		{
-			sumPoints = data.getContacts()[i];
+			sumPoints += data.getContacts()[i];
 			count++;
 		}
 		sumPoints = sumPoints / count;
-		glm::vec3 r1 = sumPoints ;
-		glm::vec3 r2 = sumPoints ;
+		glm::vec3 r1 = sumPoints -rb1.getPos();
+		glm::vec3 r2 = sumPoints - rb2.getPos() ;
 
 		glm::mat4 i1 = rb1.getInvInertia();
 		glm::mat4 i2 = rb2.getInvInertia();
@@ -130,15 +126,13 @@ void respond(RigidBody& rb1, RigidBody& rb2, IntersectData data)
 		glm::vec3 relativeNorm = data.getNormal();
 		relativeNorm = glm::normalize(relativeNorm);
 
-		auto halfDepth = data.getDepth() / 2.0f;
-		rb1.translate(-halfDepth*relativeNorm);
-		rb2.translate(halfDepth*relativeNorm);
+		
 
 		if (glm::dot(relativeVel, relativeNorm) > 0.0f) {
 			return;
 		}
 
-		float e = 0.7f;
+		float e = 0.01f;
 		float numerator = (-(1.0f + e)* glm::dot(relativeVel, relativeNorm));
 		float d1 = invMassSum;
 		glm::vec3 d2 = glm::cross((glm::vec3(glm::vec4(glm::cross(r1, relativeNorm),1.0f) * i1)), r1);
@@ -151,16 +145,46 @@ void respond(RigidBody& rb1, RigidBody& rb2, IntersectData data)
 		}
 
 		glm::vec3 impulse = relativeNorm * j;
+
+	/*	std::cout <<"R1"<< glm::to_string(r1) << std::endl;
+		std::cout << "R2" << glm::to_string(r2) << std::endl;
+		std::cout << "Sumpoints" << glm::to_string(sumPoints) << std::endl;
+		std::cout <<"Rigidbody OBB"<< glm::to_string(rb1.getOrientedBoxCollider().getPosition()) << std::endl;
+		std::cout << "Rigidbody " << glm::to_string(rb1.getPos()) << std::endl;
+		for (int i = 0; i < data.getContacts().size(); i++)
+		{
+			std::cout << "Contacts" << glm::to_string(data.getContacts()[i]) << std::endl;
+		}*/
+
+		auto halfDepth = data.getDepth() / 2.0f;
+			rb2.translate(halfDepth*relativeNorm);
+
+
+		
+/*
+		rb1.setVel(glm::vec3(0.0f));
+		rb1.setAngVel(glm::vec3(0.0f));
+		rb1.setAcc(glm::vec3(0.0f));
+
+		rb2.setVel(glm::vec3(0.0f));
+		rb2.setAngVel(glm::vec3(0.0f));
+		rb2.setAcc(glm::vec3(0.0f));*/
+
+
+
+
 		if (glm::length(impulse) > 0.0f)
 		{
+			
 			rb1.getVel() = rb1.getVel() - impulse * invMass1;
 			rb2.getVel() = rb2.getVel() + impulse * invMass2;
 			rb1.setAngVel(rb1.getAngVel() - (glm::vec3(glm::vec4(glm::cross(r1, impulse), 0.0f) * i1)));
 			rb2.setAngVel(rb2.getAngVel() + (glm::vec3(glm::vec4(glm::cross(r2, impulse), 0.0f) * i2)));
 		}
 
-		glm::vec3 t = relativeVel - (relativeNorm* glm::dot(relativeVel, relativeNorm));
-		if (islessequal(glm::length2(t), 0.0f)) {
+		glm::vec3 t = relativeVel - (relativeNorm* glm::dot(relativeVel, relativeNorm));
+
+		if (CMP(glm::length2(t), 0.0f)) {
 			return;
 		}
 		t = glm::normalize(t);
@@ -169,28 +193,47 @@ void respond(RigidBody& rb1, RigidBody& rb2, IntersectData data)
 		d1 = invMassSum;
 		d2 = glm::cross(glm::vec3( glm::vec4(glm::cross(r1, t),1.0f)* i1), r1);
 		d3 = glm::cross(glm::vec3(glm::vec4(glm::cross(r2, t), 1.0f)* i2), r2);
-		denominator = d1 + glm::dot(t, d2 + d3);		if (denominator == 0.0f) {
+		denominator = d1 + glm::dot(t, d2 + d3);
+
+		if (denominator == 0.0f) {
 			return;
-		}		float jt = numerator / denominator;
+		}
+
+		float jt = numerator / denominator;
 		if (data.getContacts().size() > 0.0f &&jt != 0.0f) {
 			jt /= (float)data.getContacts().size();
-		}		if (islessequal(jt, 0.0f)) {
+		}
+
+		if (isgreaterequal(jt, 0.0f)) {
 			return;
-		}		float friction = 0.3f;
+		}
+
+		float friction = 0.3f;
 		if (jt> j * friction) {
 			jt = j * friction;
 		}
 		else if (jt< -j * friction) {
 			jt = -j * friction;
-		}		glm::vec3 tangentImpuse = t * jt;
-		if (glm::length(tangentImpuse) > 0.0f)
-		{
-		
+		}
 
-		/*	rb1.getVel() = rb1.getVel() + tangentImpuse * invMass1;
+		glm::vec3 tangentImpuse = t * jt;
+	/*	if (glm::length(tangentImpuse) > 0.0f)
+		{
+			rb1.getVel() = rb1.getVel() + tangentImpuse * invMass1;
 			rb2.getVel() = rb2.getVel() - tangentImpuse * invMass2;
 			rb1.setAngVel(rb1.getAngVel() + glm::vec3(glm::vec4(glm::cross(r1, tangentImpuse), 1.0f)* i1));
-			rb2.setAngVel(rb2.getAngVel() - glm::vec3(glm::vec4(glm::cross(r2, tangentImpuse), 1.0f)* i2));*/		}		
+			rb2.setAngVel(rb2.getAngVel() - glm::vec3(glm::vec4(glm::cross(r2, tangentImpuse), 1.0f)* i2));
+		}*/
+		glm::vec3 vt = relativeVel - glm::dot(relativeVel, relativeNorm) * relativeNorm;
+		float mu = 0.5f;
+		glm::vec3 jFriction = -mu * glm::length(j) * glm::normalize(vt);
+
+		if (glm::length(jFriction) > 0.0f) {
+			rb1.setVel(rb1.getVel() - (jFriction / rb1.getMass()));
+			rb1.setAngVel(rb1.getAngVel() - (rb1.getInvInertia() * glm::cross(r1, jFriction)));
+			rb2.setVel(rb2.getVel() + (jFriction / rb2.getMass()));
+			rb2.setAngVel(rb2.getAngVel() + (rb2.getInvInertia() * glm::cross(r2, jFriction)));
+		}
 
 
 }
@@ -238,7 +281,7 @@ void collisionResponce(RigidBody &rb, Mesh plane, std::set<Vertex>collidingVerti
 	glm::vec3 displacement = glm::vec3(0.0f);
 	displacement.y = glm::abs(lowestVertex.getCoord().y);
 	rb.translate(displacement);
-	if (glm::length(rb.getVel()) + glm::length(rb.getAngVel()) < 0.2f)
+	if (glm::length(rb.getVel()) + glm::length(rb.getAngVel()) < 0.05f)
 	{
 		rb.getVel() = glm::vec3(0.0f);
 		rb.setAngVel(glm::vec3(0.0f));
@@ -259,7 +302,7 @@ void collisionResponce(RigidBody &rb, Mesh plane, std::set<Vertex>collidingVerti
 	glm::vec3 r = averageCollidingPoint.getCoord() - rb.getPos();
 	glm::vec3 relVel = rb.getVel() + glm::cross(rb.getAngVel(), r);
 	glm::vec3 n = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
-	float e = 0.3f;
+	float e = 0.2f;
 	glm::vec3 j = (-(1 + e) * relVel * n) / (pow(rb.getMass(), -1) + n * glm::cross((rb.getInvInertia() * (glm::cross(r, n))), r));
 	// apply j
 	if (glm::length(j) > 0) {
@@ -268,7 +311,7 @@ void collisionResponce(RigidBody &rb, Mesh plane, std::set<Vertex>collidingVerti
 	}
 	// friction
 	glm::vec3 vt = relVel - glm::dot(relVel, n) * n;
-	float mu = 0.03f;
+	float mu = 0.5f;
 	glm::vec3 jFriction = -mu * glm::length(j) * glm::normalize(vt);
 
 	if (glm::length(j) > 0) {
@@ -302,16 +345,33 @@ int main()
 	Wind wind = Wind();
 	wind.setWind(glm::vec3(1.0f, 0.0f, .0f));
 
-	// BODY 1
+
+
+	
+	// BODY 2
+	RigidBody rb2 = RigidBody();
+	rb2.setMesh(Mesh::CUBE);
+	rb2.getMesh().setShader(Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag"));
+	rb2.setMass(2.0f);
+	rb2.translate(glm::vec3(3.0f, 5.0f, 0.0f));
+	rb2.setVel(glm::vec3(-3.0f, 0.0f, 0.0f));
+	rb2.scale(glm::vec3( 2.0f, 0.25f, 1.0f));
+	//rb2.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
+	rb2.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
+	rb2.addCollider(TYPE::OBB);
+	// add forces to Rigid body
+	rb2.addForce(&g);
+
+		// BODY 1
 	RigidBody rb = RigidBody();
 	rb.setMesh(Mesh::CUBE);
 	rb.getMesh().setShader(Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag"));
 	rb.setMass(2.0f);
-	rb.translate(glm::vec3(0.0f, 2.0f, 0.0f));
-	rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
+	rb.translate(glm::vec3(0.0f, 4.0f, 0.0f));
+	rb.setVel(glm::vec3(1.0f, 0.0f, 0.0f));
 	rb.scale(glm::vec3(0.25f, 2.0f, 1.0f));
 	//rb2.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
-	rb.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
+	rb.setAngVel(glm::vec3(0.0f, 0.0f, -0.5f));
 	rb.addCollider(TYPE::OBB);
 	// add forces to Rigid body
 	rb.addForce(&g);
@@ -320,7 +380,7 @@ int main()
 	RigidBody rb3 = RigidBody();
 	rb3.setMesh(Mesh::CUBE);
 	rb3.getMesh().setShader(Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag"));
-	rb3.setMass(2.0f);
+	rb3.setMass(1.0f);
 	rb3.translate(glm::vec3(-2.0f, 2.0f, 0.0f));
 	rb3.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
 	rb3.scale(glm::vec3(0.25f, 2.0f, 1.0f));
@@ -334,7 +394,7 @@ int main()
 	RigidBody rb4 = RigidBody();
 	rb4.setMesh(Mesh::CUBE);
 	rb4.getMesh().setShader(Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag"));
-	rb4.setMass(2.0f);
+	rb4.setMass(1.0f);
 	rb4.translate(glm::vec3(-4.0f, 2.0f, 0.0f));
 	rb4.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
 	rb4.scale(glm::vec3(0.25f, 2.0f, 1.0f));
@@ -343,20 +403,6 @@ int main()
 	rb4.addCollider(TYPE::OBB);
 	// add forces to Rigid body
 	rb4.addForce(&g);
-
-	// BODY 2
-	RigidBody rb2 = RigidBody();
-	rb2.setMesh(Mesh::CUBE);
-	rb2.getMesh().setShader(Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag"));
-	rb2.setMass(2.0f);
-	rb2.translate(glm::vec3(-2.0f, 10.0f, 0.0f));
-	rb2.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
-	rb2.scale(glm::vec3(2.0f, 0.25f, 1.0f));
-	//rb2.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
-	rb2.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
-	rb2.addCollider(TYPE::OBB);
-	// add forces to Rigid body
-	rb2.addForce(&g);
 
 
 
@@ -378,7 +424,7 @@ int main()
 		GLfloat frameTime = newTime - currentTime;
 
 		//*******************************************************************************************************************
-		frameTime *= 4;
+		frameTime *= 2;
 		currentTime = newTime;
 		accumulator += frameTime;
 

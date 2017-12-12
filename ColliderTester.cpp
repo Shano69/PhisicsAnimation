@@ -52,6 +52,25 @@ glm::vec3 ColliderTester::closestPoint(OBB obb, const glm::vec3& point)
 	return result;
 }
 
+
+bool ColliderTester::PointInOBB(glm::vec3 point,  OBB obb) {	glm::vec3 dir = point - obb.getPosition();
+	for (int i = 0; i < 3; ++i) {		const float* orientation = &(value_ptr(obb.getOrientation()))[i * 3];
+		glm::vec3 axis(	orientation[0],	orientation[1],	orientation[2]);
+
+		float distance = glm::dot(dir, axis);
+
+		if (distance >obb.getSize()[i]) {
+			return false;
+		}
+		if (distance < -obb.getSize()[i]) {
+			return false;
+		}
+	}
+	return true;
+
+}
+
+
 glm::vec3 ColliderTester::closestPoint(BoundingSphere sphere, const glm::vec3& point)
 {
 	glm::vec3 sphereToPoint = point - sphere.getCenter();
@@ -104,8 +123,7 @@ Interval ColliderTester::getInterval(OBB obb, const glm::vec3 axis)
 std::vector<glm::vec3> ColliderTester::getVertices(OBB obb)
 {
 	std::vector<glm::vec3> v;
-	v.resize(8);
-
+	v.resize(8);
 	glm::vec3 C = obb.getPosition(); // OBB Center
 	glm::vec3 E = obb.getSize(); // OBB Extents
 	const float* o = glm::value_ptr(obb.getOrientation());
@@ -136,7 +154,6 @@ std::vector<Line> ColliderTester::getEdges(OBB  obb)
 
 	//gets vertices
 	auto v = getVertices(obb);
-	//TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	////array holding pairs of vertices
 	int index[][2] = { // Indices of edge-vertices
@@ -146,7 +163,7 @@ std::vector<Line> ColliderTester::getEdges(OBB  obb)
 
 	//loop trough index array and construct edges
 	for (int j = 0; j < 12; ++j) {
-		result.push_back(Line(v[0], v[1]));
+		result.push_back(Line(v[index[j][0]], v[index[j][1]]));
 	}
 
 	return result;
@@ -187,7 +204,7 @@ bool ColliderTester::clipToPlane(Plane  plane, const Line & line, glm::vec3 * ou
 	glm::vec3 ab = line.end - line.start;
 	float nAB = glm::dot(normal, ab);
 
-	if (islessequal(nAB, 0))
+	if (CMP(nAB, 0.0f))
 	{
 		return	false;
 	}
@@ -212,17 +229,21 @@ std::vector<glm::vec3> ColliderTester::clipEdgesToOBB(const std::vector<Line>& e
 	result.reserve(edges.size());
 	glm::vec3 intersection;
 	std::vector<Plane>&	planes = getPlanes(obb);
-
+	int count = 0;
 	for (int i = 0; i < planes.size(); ++i)
 	{
 		for (int j = 0; j < edges.size(); ++j)
 		{
-			if (clipToPlane(planes[i], edges[j], &intersection))
-			{
-				result.push_back(intersection);
+			if (clipToPlane(planes[i],edges[j], &intersection))			{				if (PointInOBB(intersection, obb))
+				{
+					result.push_back(intersection);
+					count++;
+				}
 			}
 		}
 	}
+
+
 
 	return result;
 }
@@ -349,10 +370,8 @@ IntersectData ColliderTester::FindCollisionFeatures(OBB A, OBB B) {
 	std::vector<glm::vec3> c1 = clipEdgesToOBB(getEdges(B), A);
 	std::vector<glm::vec3> c2 = clipEdgesToOBB(getEdges(A), B);
 	std::vector<glm::vec3> resultContacts;
-	resultContacts.insert(resultContacts.end(),
-		c1.begin(), c1.end());
-	resultContacts.insert(resultContacts.end(),
-		c2.begin(), c2.end());
+	resultContacts.insert(resultContacts.end(),c1.begin(), c1.end());
+	resultContacts.insert(resultContacts.end(),c2.begin(), c2.end());
 
 
 	Interval i = getInterval(A, axis);
@@ -361,9 +380,20 @@ IntersectData ColliderTester::FindCollisionFeatures(OBB A, OBB B) {
 	for (int i = resultContacts.size() - 1; i >= 0; --i) {
 		glm::vec3 contact = resultContacts[i];
 
-		resultContacts[i] = contact + (axis *
-			glm::dot(axis, pointOnPlane - contact));
+		resultContacts[i] = contact + (axis * glm::dot(axis, pointOnPlane - contact));
 	}
+
+	for (int i = resultContacts.size() - 1; i >= 0; --i) {
+		glm::vec3 contact = resultContacts[i];
+		resultContacts[i] = contact + (axis *glm::dot(axis, pointOnPlane - contact));
+		for (int j = resultContacts.size() - 1; j > i; --j) {
+			if (glm::length2(resultContacts[j] - resultContacts[i]) < 0.001f) {
+				resultContacts.erase(resultContacts.begin() + j);
+				break;
+			}
+		}
+	}
+
 	result.setHasIntersection(true);
 	result.insertContact(resultContacts);
 	result.setNormal(axis);
