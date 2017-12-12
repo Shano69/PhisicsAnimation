@@ -354,10 +354,10 @@ int main()
 	rb2.getMesh().setShader(Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag"));
 	rb2.setMass(2.0f);
 	rb2.translate(glm::vec3(3.0f, 5.0f, 0.0f));
-	rb2.setVel(glm::vec3(-3.0f, 0.0f, 0.0f));
+	rb2.setVel(glm::vec3(-4.0f, 0.0f, 0.0f));
 	rb2.scale(glm::vec3( 2.0f, 0.25f, 1.0f));
 	//rb2.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
-	rb2.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
+	rb2.setAngVel(glm::vec3(3.0f, 0.0f, 5.0f));
 	rb2.addCollider(TYPE::OBB);
 	// add forces to Rigid body
 	rb2.addForce(&g);
@@ -368,10 +368,10 @@ int main()
 	rb.getMesh().setShader(Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag"));
 	rb.setMass(2.0f);
 	rb.translate(glm::vec3(0.0f, 4.0f, 0.0f));
-	rb.setVel(glm::vec3(1.0f, 0.0f, 0.0f));
+	rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
 	rb.scale(glm::vec3(0.25f, 2.0f, 1.0f));
 	//rb2.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
-	rb.setAngVel(glm::vec3(0.0f, 0.0f, -0.5f));
+	rb.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
 	rb.addCollider(TYPE::OBB);
 	// add forces to Rigid body
 	rb.addForce(&g);
