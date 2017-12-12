@@ -50,6 +50,9 @@ public:
 		updateCameraVectors();
 	}
 
+	// get position
+	glm::vec3 getPosition() { return m_position; }
+
 	// Returns the view matrix calculated using Eular Angles and the LookAt Matrix
 	glm::mat4 GetViewMatrix()
 	{
@@ -133,7 +136,7 @@ public:
 		}
 	}
 
-	GLfloat GetZoom(){return m_zoom;}
+	GLfloat GetZoom() { return m_zoom; }
 
 private:
 	// Camera Attributes
@@ -162,7 +165,7 @@ private:
 		front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
 		m_front = glm::normalize(front);
 		// re-calculate the Right and Up vector (Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.)
-		m_right = glm::normalize(glm::cross(m_front, m_worldUp));  
+		m_right = glm::normalize(glm::cross(m_front, m_worldUp));
 		m_up = glm::normalize(glm::cross(m_right, m_front));
 	}
 };

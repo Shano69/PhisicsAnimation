@@ -16,6 +16,9 @@
     <ClCompile Include="Task2and3.cpp" />
     <ClCompile Include="Rigid1cpp.cpp" />
     <ClCompile Include="Rigid2.cpp" />
+    <ClCompile Include="ColliderTester.cpp" />
+    <ClCompile Include="SAT.cpp" />
+    <ClCompile Include="Final.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -28,6 +31,9 @@
     <ClInclude Include="RigidBody.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Rigid.h" />
+    <ClInclude Include="Colliders.h" />
+    <ClInclude Include="ColliderTester.h" />
+    <ClInclude Include="IntersectData.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\basic.frag" />

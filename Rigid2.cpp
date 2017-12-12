@@ -28,25 +28,6 @@ bool collide = false;
 glm::vec3 lowestPoint = glm::vec3(0.0f);
 glm::vec3 pointOfCollision = glm::vec3(0.0f);
 
-void friction(glm::vec3 j, glm::vec3 n, glm::vec3 vr, glm::vec3 r, RigidBody &rb)
-{
-	float jt = j.x*n.x + j.y*n.y;
-	glm::vec3 vt = vr - (glm::dot(vr, n)*n);
-	glm::vec3 jn = jt*vr;
-	if (glm::length(jn) > 0.9*glm::length(j))
-	{
-		jn = 0.9*j;
-	}
-
-
-	glm::vec3 jf = jn * vt;
-
-	rb.setVel(rb.getVel() - (jf / rb.getMass()));
-	rb.setAngVel(rb.getAngVel() - (rb.getInvInertia() * glm::cross(r, jf)));
-
-}
-
-
 
 std::set<Vertex> collidingVerts(float yCoordinate, RigidBody &rb)
 {
@@ -105,7 +86,7 @@ int main()
 	rb.setVel(glm::vec3(5.0f, 0.0f, 0.0f));
 	rb.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
 	rb.getMesh().scale(glm::vec3(1.0f, 3.0f, 1.0f));
-	rb.setMass(1.0f);
+	rb.setMass(2.0f);
 
 
 

@@ -23,7 +23,7 @@
     <ProjectGuid>{FDA25432-B963-4934-9C02-9B3C3B0F7FB0}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>simulation</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -99,7 +99,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>.\glew\lib\Release\Win32;.\glfw\lib-vc2015;.\soil\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3.lib;soil2-debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew/lib/Release/Win32/glew32s.lib;glfw3.lib;soil2-debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>
       </ImportLibrary>
       <StackReserveSize>1000000</StackReserveSize>
@@ -170,6 +170,8 @@
     <ClCompile Include="Body.cpp" />
     <ClCompile Include="ClothTask.cpp" />
     <ClCompile Include="ClothTask2.cpp" />
+    <ClCompile Include="ColliderTester.cpp" />
+    <ClCompile Include="Final.cpp" />
     <ClCompile Include="Force.cpp" />
     <ClCompile Include="MainOld.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -179,6 +181,7 @@
     <ClCompile Include="Rigid1cpp.cpp" />
     <ClCompile Include="Rigid2.cpp" />
     <ClCompile Include="RigidBody.cpp" />
+    <ClCompile Include="SAT.cpp" />
     <ClCompile Include="Task1.cpp" />
     <ClCompile Include="Task2and3.cpp" />
   </ItemGroup>
@@ -190,7 +193,10 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="Body.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Colliders.h" />
+    <ClInclude Include="ColliderTester.h" />
     <ClInclude Include="Force.h" />
+    <ClInclude Include="IntersectData.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="OBJLoader.h" />
     <ClInclude Include="Particle.h" />

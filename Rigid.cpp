@@ -1,10 +1,10 @@
-//#if 0
+#if 0
 #include "Particle.h"
 #include "Application.h"
 #include "Shader.h"
 #include "RigidBody.h"
 #include <random>
-
+#include <set>
 
 // Std. Includes
 #include <string>
@@ -14,6 +14,7 @@
 // Other Libs
 #include "SOIL2/SOIL2.h"
 #include "Rigid.h"
+
 /*
 Vectors and Arrays
 */
@@ -29,28 +30,9 @@ glm::vec3 lowestPoint = glm::vec3(0.0f);
 glm::vec3 pointOfCollision = glm::vec3(0.0f);
 
 
-void friction(glm::vec3 j, glm::vec3 n ,glm::vec3 vr,glm::vec3 r,RigidBody &rb)
-{
-	float jt = j.x*n.x + j.y*n.y;
-	glm::vec3 vt = vr - (glm::dot(vr, n)*n);
-	glm::vec3 jn=jt*vr;
-	if (glm::length(jn) > 0.9*glm::length(j))
-	{
-		jn = 0.9*j;
-	}
-	
-	
-	glm::vec3 jf = jn * vt;
-
-	rb.setVel(rb.getVel() - (jf / rb.getMass()));
-	rb.setAngVel(rb.getAngVel() - (rb.getInvInertia() * glm::cross(r, jf)));
-
-}
-
-
 void collisionResponce(RigidBody &rb, Mesh plane,std::set<Vertex>collidingVertices)
 {
-	std::cout << "collides" << std::endl;
+	//std::cout << "collides" << std::endl;
 	Vertex lowestVertex;
 	// translate up on y axis by the lowest vertex on the y axis
 	for (auto v : collidingVertices)
@@ -71,7 +53,13 @@ void collisionResponce(RigidBody &rb, Mesh plane,std::set<Vertex>collidingVertic
 	glm::vec3 displacement = glm::vec3(0.0f);
 	displacement.y = glm::abs(lowestVertex.getCoord().y);
 	rb.translate(displacement);
-
+	if (glm::length(rb.getVel()) + glm::length(rb.getAngVel()) < 0.03f)
+	{
+		rb.getVel() = glm::vec3(0.0f);
+		rb.setAngVel(  glm::vec3(0.0f));
+		rb.getAcc() = glm::vec3(0.0f);
+		displacement.y = 0.0f;
+	}
 
 
 	glm::vec3 sum = glm::vec3(0.0f);
@@ -86,33 +74,25 @@ void collisionResponce(RigidBody &rb, Mesh plane,std::set<Vertex>collidingVertic
 	glm::vec3 r = averageCollidingPoint.getCoord() - rb.getPos();
 	glm::vec3 relVel = rb.getVel() + glm::cross(rb.getAngVel(), r);
 	glm::vec3 n = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
-	float e = 0.7f;
+	float e = 0.2f;
 	glm::vec3 j = (-(1 + e) * relVel * n) / (pow(rb.getMass(), -1) + n * glm::cross((rb.getInvInertia() * (glm::cross(r, n))), r));
 	// apply j
-	rb.setVel(rb.getVel() + (j / rb.getMass()));
-	rb.setAngVel(rb.getAngVel() + (rb.getInvInertia() * glm::cross(r, j)));
-
+	if (glm::length(j) > 0) {
+		rb.setVel(rb.getVel() + (j / rb.getMass()));
+		rb.setAngVel(rb.getAngVel() + (rb.getInvInertia() * glm::cross(r, j)));
+	}
 	// friction
 		glm::vec3 vt = relVel - glm::dot(relVel, n) * n;
-		float mu = 0.06;
+		float mu = 0.09;
 		glm::vec3 jFriction = -mu * glm::length(j) * glm::normalize(vt);
 
 		if (glm::length(j) > 0) {
 			rb.setVel(rb.getVel() + (jFriction / rb.getMass()));
 			rb.setAngVel(rb.getAngVel() + (rb.getInvInertia() * glm::cross(r, jFriction)));
 		}
-		if (abs(rb.getAngVel().y) < 0.01)
-		{
-			rb.setAngVel(glm::vec3(rb.getAngVel().x, rb.getAngVel().y / 100, rb.getAngVel().z));
-		}
-		if (abs(rb.getAngVel().x) < 0.01)
-		{
-			rb.setAngVel(glm::vec3(rb.getAngVel().x/100, rb.getAngVel().y , rb.getAngVel().z));
-		}
-		if (abs(rb.getAngVel().z) < 0.01)
-		{
-			rb.setAngVel(glm::vec3(rb.getAngVel().x, rb.getAngVel().y , rb.getAngVel().z/100));
-		}
+
+	
+		
 	}
 
 
@@ -152,10 +132,11 @@ int main()
 
 	
 	// create ground plane
-	Mesh plane = Mesh::Mesh();
-	// scale it up x5
-	plane.scale(glm::vec3(20.0f, 1.0f, 20.0f));
-	plane.setShader(Shader("resources/shaders/core.vert", "resources/shaders/core.frag"));
+	Mesh plane = Mesh::Mesh(Mesh::QUAD);
+	//Mesh plane = Mesh::Mesh("resources/models/plane10.obj");
+	plane.setShader(Shader("resources/shaders/physics.vert", "resources/shaders/transp.frag"));
+	plane.scale(glm::vec3(20.0f, 20.0f, 20.0f));
+	plane.translate(glm::vec3(0.0f, 0.0f, 0.0f));
 	Gravity g = Gravity();
 	Drag drag = Drag();
 	Wind wind = Wind();
@@ -165,24 +146,24 @@ int main()
 	 RigidBody rb = RigidBody();
 	 Mesh m = Mesh::Mesh(Mesh::CUBE);
 	 rb.setMesh(m);
-	 Shader rbShader = Shader("resources/shaders/core.vert", "resources/shaders/core_blue.frag");
+	 Shader rbShader = Shader("resources/shaders/physics.vert", "resources/shaders/physics.frag");
 	 rb.getMesh().setShader(rbShader);
 	 std::set<Vertex> pointsCollided;
 
 	// rigid body motion values
 	 rb.translate(glm::vec3(0.0f,10.0f, 0.0f));
-	 rb.setVel(glm::vec3(5.0f, 0.0f, 0.0f));
-	 rb.setAngVel(glm::vec3(0.1f,0.1f,0.1f));
+	 rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
+	 rb.setAngVel(glm::vec3(0.0f,1.0f,1.0f));
 	 rb.getMesh().scale(glm::vec3(1.0f, 3.0f, 1.0f));
-	 rb.setMass(1.0f);
+	 rb.setMass(2.0f);
 	 
 	 
-	
+
 
 		 // add forces to Rigid body
 		 rb.addForce(&g);
 	// new time	
-	const float dt = 0.01f;
+	const float dt = 0.003f;
 	float accumulator = 0.0f;
 	GLfloat currentTime = (GLfloat)glfwGetTime();
 
@@ -259,4 +240,4 @@ int main()
 
 	return EXIT_SUCCESS;
 }
-//#endif
+#endif

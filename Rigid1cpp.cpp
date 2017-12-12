@@ -56,7 +56,7 @@ int main()
 	rb.setVel(glm::vec3(0.0f, 0.0f, 0.0f));
 	rb.setAngVel(glm::vec3(0.0f, 0.0f, 0.0f));
 	rb.getMesh().scale(glm::vec3(1.0f, 3.0f, 1.0f));
-	rb.setMass(1.0f);
+	rb.setMass(2.0f);
 
 
 
@@ -71,6 +71,9 @@ int main()
 	bool appliedImpulse = false;
 	bool appliedImpulse2 = false;
 	bool appliedImpulse3 = false;
+
+	std::cout << glm::to_string(rb.getInvInertia()) << std::endl;
+
 
 	// Game loop
 	while (!glfwWindowShouldClose(app.getWindow()))
